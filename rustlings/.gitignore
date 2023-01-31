@@ -1,6 +1,7 @@
 *.swp
 target/
 **/*.rs.bk
+.DS_Store
 **/.DS_Store
 *.pdb
 exercises/clippy/Cargo.toml
