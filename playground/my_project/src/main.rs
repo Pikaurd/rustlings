@@ -1,38 +1,46 @@
-// errors3.rs
-// This is a program that is trying to use a completed version of the
-// `total_cost` function from the previous exercise. It's not working though!
-// Why not? What should we do to fix it?
-// Execute `rustlings hint errors3` or use the `hint` watch subcommand for a hint.
+use std::sync::mpsc;
+use std::thread;
+use std::time::Duration;
 
-// I AM NOT DONE
+fn main() {
+    // --snip--
 
-use std::num::ParseIntError;
+    let (tx, rx) = mpsc::channel();
 
-fn main() -> Result<(), ParseIntError> {
-    let mut tokens = 100;
-    let pretend_user_input = "8";
+    let tx1 = tx.clone();
+    thread::spawn(move || {
+        let vals = vec![
+            String::from("hi"),
+            String::from("from"),
+            String::from("the"),
+            String::from("thread"),
+        ];
 
-    let cost = total_cost(pretend_user_input)?;
+        for val in vals {
+            tx1.send(val).unwrap();
+            thread::sleep(Duration::from_secs(1));
+        }
+    });
+    println!("A thread started");
 
-    if cost > tokens {
-        println!("You can't afford that many!");
-    } else {
-        tokens -= cost;
-        println!("You now have {} tokens.", tokens);
+    thread::spawn(move || {
+        let vals = vec![
+            String::from("more"),
+            String::from("messages"),
+            String::from("for"),
+            String::from("you"),
+        ];
+
+        for val in vals {
+            tx.send(val).unwrap();
+            thread::sleep(Duration::from_secs(1));
+        }
+    });
+    println!("Another thread started");
+
+    for received in rx {
+        println!("Got: {}", received);
     }
 
-    Ok(())
-}
-
-pub fn total_cost(item_quantity: &str) -> Result<i32, ParseIntError> {
-    let processing_fee = 1;
-    let cost_per_item = 5;
-    let qty = item_quantity.parse::<i32>()?;
-
-    Ok(qty * cost_per_item + processing_fee)
-
-    // match item_quantity.parse::<i32>() {
-    //     Ok(qty) => Ok(qty * cost_per_item + processing_fee),
-    //     Err(e) => Err(e),
-    // }
+    // --snip--
 }
